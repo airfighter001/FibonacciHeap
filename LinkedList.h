@@ -35,6 +35,15 @@ int deleteNode(node_t * node) {
 	return 1;
 }
 
+int addToList(list_t * list, node_t * node) {
+	node->rightNode = list->head;
+	node->leftNode = list->tail;
+	list->head->leftNode = node;
+	list->tail->rightNode = node;
+	list->tail = node;
+	return 1;
+}
+
 int removeFromList(list_t * list, node_t * node) {
 	if (node->leftNode == node) {
 		list->head = NULL;
@@ -52,5 +61,6 @@ int deleteList(list_t * list) {
 	while (list->head != NULL) {
 			removeFromList(list, list->tail);
 	}
+	free(list);
 	return 1;
 }

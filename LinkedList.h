@@ -60,6 +60,8 @@ int removeFromList(list_t * list, node_t * node, int fullDelete) {
 	} else {
 		node->leftNode->rightNode = node->rightNode;
 		node->rightNode->leftNode = node->leftNode;
+		if (node == list->head) list->head = list->head->rightNode;
+		if (node == list->tail) list->tail = list->tail->leftNode;
 	}
 	if (fullDelete) deleteNode(node);
 	list->size--;

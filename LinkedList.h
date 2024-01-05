@@ -18,12 +18,6 @@ typedef struct list {
 	struct node * tail;
 } list_t;
 
-list_t * createList() {
-	list_t * list = (list_t *)malloc(sizeof(list_t));
-	list->size = 0;
-	return list;
-}
-
 node_t * createNode() {
 	node_t * node = (node_t *)malloc(sizeof(node_t));
 	node->key = -1;
@@ -34,6 +28,12 @@ node_t * createNode() {
 int deleteNode(node_t * node) {
 	free(node);
 	return 1;
+}
+
+list_t * createList() {
+	list_t * list = (list_t *)malloc(sizeof(list_t));
+	list->size = 0;
+	return list;
 }
 
 int addToList(list_t * list, node_t * node) {
@@ -69,4 +69,16 @@ int deleteList(list_t * list) {
 	}
 	free(list);
 	return 1;
+}
+
+node_t * findNode(list_t * list, int searchKey) {
+	node_t * currentNode = list->head;
+	do {
+		if (currentNode->key == searchKey) {
+			return currentNode;
+		}
+		currentNode = currentNode->rightNode;
+
+	}while (currentNode->rightNode != list->head);
+	return NULL;
 }

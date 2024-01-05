@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "LinkedList.h"
 
 typedef struct fibheap {
@@ -6,23 +7,31 @@ typedef struct fibheap {
 	struct list * root_list;
 } fibheap_t;
 
-int addNode(int key, void* value, node_t* leftNode, node_t* rightNode, node_t* father, node_t* child) {
-	
+fibheap_t * createFibHeap() {
+	fibheap_t * fibHeap = (fibheap_t *)malloc(sizeof(fibheap_t));
+	fibHeap->root_list = (list_t *)malloc(sizeof(list_t));
+	return fibHeap;
+}
+
+int getMin(fibheap_t fibheap) {
+	return fibheap.min->key;
+}
+
+int insert(node_t * node, fibheap_t fibheap) {
+	addToList(fibheap.root_list, node);
 	return 1;
 }
 
+
 int main() {
-	node_t * head = createNode();
+	node_t * head = createNode(10, NULL);
 	head->leftNode = head;
 	head->rightNode = head;
-	head->key = 10;
-
-	printf("Node-Key:%d\n", head->key);
 
 	list_t * root = createList();
-	printf("%ld\n", root->size);
 	addToList(root, head);
-	puts("test");
+
+
 	printf("List-Size:%ld\n", root->size);
 	printf("Head-Key:%d\n", root->head->key);
 

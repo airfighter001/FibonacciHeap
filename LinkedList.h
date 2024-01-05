@@ -7,7 +7,7 @@ typedef struct node {
 	int marked;
 	struct node * leftNode;
 	struct node * rightNode;
-	struct node * father;
+	struct list * own;
 	struct list * child;
 } node_t;
 
@@ -15,6 +15,7 @@ typedef struct list {
 	size_t size;
 	struct node * head;
 	struct node * tail;
+	struct node * father;
 } list_t;
 
 node_t * createNode(int key, void* value) {
@@ -47,6 +48,7 @@ int addToList(list_t * list, node_t * node) {
 	list->head->leftNode = node;
 	list->tail->rightNode = node;
 	list->tail = node;
+	node->own = list;
 	list->size++;
 	return 1;
 }
@@ -66,6 +68,9 @@ int removeFromList(list_t * list, node_t * node, int fullDelete) {
 
 int deleteList(list_t * list) {
 	while (list->head != NULL) {
+		if (list->tail->child != NULL) {
+			deleteList(list->tail->child);
+		}
 		removeFromList(list, list->tail, 1);
 	}
 	free(list);

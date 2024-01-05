@@ -8,7 +8,7 @@ typedef struct node {
 	struct node * leftNode;
 	struct node * rightNode;
 	struct node * father;
-	struct node * child;
+	struct list * child;
 } node_t;
 
 typedef struct list {
@@ -17,9 +17,9 @@ typedef struct list {
 	struct node * tail;
 } list_t;
 
-node_t * createNode() {
+node_t * createNode(int key, void* value) {
 	node_t * node = (node_t *)malloc(sizeof(node_t));
-	node->key = -1;
+	node->key = key;
 	node->marked = 0;
 	return node;
 }
@@ -31,6 +31,8 @@ int deleteNode(node_t * node) {
 
 list_t * createList() {
 	list_t * list = (list_t *)malloc(sizeof(list_t));
+	list->head = NULL;
+	list->tail = NULL;
 	list->size = 0;
 	return list;
 }

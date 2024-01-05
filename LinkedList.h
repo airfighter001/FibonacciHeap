@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <ctype.h>
+#include <stdio.h>
 
 typedef struct node {
 	int key;
@@ -36,11 +37,16 @@ int deleteNode(node_t * node) {
 }
 
 int addToList(list_t * list, node_t * node) {
+	if (list->head == NULL) {
+		list->head = node;
+		list->tail = node;
+	}
 	node->rightNode = list->head;
 	node->leftNode = list->tail;
 	list->head->leftNode = node;
 	list->tail->rightNode = node;
 	list->tail = node;
+	list->size++;
 	return 1;
 }
 
@@ -59,7 +65,7 @@ int removeFromList(list_t * list, node_t * node) {
 
 int deleteList(list_t * list) {
 	while (list->head != NULL) {
-			removeFromList(list, list->tail);
+		removeFromList(list, list->tail);
 	}
 	free(list);
 	return 1;

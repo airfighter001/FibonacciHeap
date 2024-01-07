@@ -30,6 +30,9 @@ void deleteFibHeap(fibheap_t * fibHeap) {
 }
 
 void mergeNodes(node_t * node1, node_t * node2, fibheap_t * fibHeap, node_t ** degrees) {
+
+	//if nodes have degree 0, there's no child list yet, create and assign child list
+	//to node with smaller key
 	if (node1->child == NULL) {
 		list_t * list = (list_t *)malloc(sizeof(list_t));
 		if (node2->key < node1->key) {
@@ -38,7 +41,13 @@ void mergeNodes(node_t * node1, node_t * node2, fibheap_t * fibHeap, node_t ** d
 			node1->child = list;
 		}
 	}
-
+	
+	//remove bigger node from current list (always root list)
+	//set list of bigger node to child list of smaller node
+	//add bigger node to child list of smaller node
+	//set entry to degree list at degree of both nodes before merging to NULL
+	//if there's an entry in degree list at new degree, call merge again with 
+	//node in degree list and merged node
 	if (node2->key < node1->key) {
 		removeFromList(node1->own, node1, 0);
 		node1->own = node2->child;
@@ -63,26 +72,42 @@ void mergeNodes(node_t * node1, node_t * node2, fibheap_t * fibHeap, node_t ** d
 }
 
 void consolidateFibHeap(fibheap_t * fibHeap) {
+
+	//initialize list of nodes by degree with 5
 	size_t maxDegree = 5;
 	node_t ** degrees = (node_t **)calloc(maxDegree, sizeof(node_t *));
+	//initialize noce to check with head of root list
 	node_t * currentNode = fibHeap->root_list->head;
+
+	// go through all nodes of the root list
 	do {
 		size_t size;
+
+		//remember the next node so it's fine if the current node becomes a child of another node
 		node_t * nextNode = currentNode->rightNode;
+
+		//if the current node has no child list, its degree is 0
 		if (currentNode->child == NULL) size = 0;
 		else size = currentNode->child->size;
+		
+		//if degree of node is too big for list, reallocate list for more space
+		if (size > maxDegree - 1) {
+			maxDegree = size + 2;
+			degrees = (node_t **)realloc(degrees, maxDegree * sizeof(node_t *));
+		}
+		//if there's an entry in the degree-list, nodes have to be merged
+		//else put current node into list
 		if (degrees[size] != NULL) {
-			if (size > maxDegree - 1) {
-				maxDegree = size + 2;
-				degrees = (node_t **)realloc(degrees, maxDegree * sizeof(node_t *));
-			}
 			mergeNodes(currentNode, degrees[size], fibHeap, degrees);		
 		
 		} else {
 			degrees[size] = currentNode;
 		}
+
+		//when done, move on to next node
 		currentNode = nextNode;
 	}while (currentNode != fibHeap->root_list->head);
+	//free memory resserved for degree list
 	free(degrees);
 }
 
@@ -116,8 +141,18 @@ node_t * extractMin(fibheap_t * fibHeap) {
 	
 	}
 	removeFromList(fibHeap->root_list, min, 0);
-
+	
+	//call function to minimize the number of nodes in the root list
 	consolidateFibHeap(fibHeap);
+	
+	//find new minimum
+	//set head to min, then go through root list and set min to node if smaller
+	node_t * currentNode = fibHeap->root_list->head;
+	fibHeap->min = currentNode;
+	do {
+		if (currentNode->key < fibHeap->min->key) fibHeap->min = currentNode;
+		currentNode = currentNode->rightNode;
+	}while (currentNode != fibHeap->root_list->head);
 
 	//return min Node in case you actually want to do something with the value...
 	return min;	
@@ -149,7 +184,8 @@ int main() {
 	//printf("List-Size:%ld\n", fib->root_list->size);
 	//printf("Head-Key:%d\n", fib->root_list->head->key);
 
-	extractMin(fib);
+	node_t * min = extractMin(fib);
+	free(min);
 	//consolidateFibHeap(fib);
 
 	printFibHeap(fib->root_list, 0);

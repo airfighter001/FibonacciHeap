@@ -29,7 +29,16 @@ void deleteFibHeap(fibheap_t * fibHeap) {
 	free(fibHeap);
 }
 
-void mergeNodes(node_t * node1, node_t * node2, fibheap_t * fibHeap) {
+void mergeNodes(node_t * node1, node_t * node2, fibheap_t * fibHeap, node_t ** degrees) {
+	if (node2->key > node1->key) {
+		removeFromList(node1->own, node1, 0);
+		node1->own = node2->child;
+		addToList(node2->child, node1);
+	} else {
+		removeFromList(node2->own, node2, 0);
+		node2->own = node1->child;
+		addToList(node1->child, node2);
+	}
 	
 	
 }
@@ -42,17 +51,19 @@ void consolidateFibHeap(fibheap_t * fibHeap) {
 		size_t size;
 		if (currentNode->child == NULL) size = 0;
 		else size = currentNode->child->size;
-		while (degrees[size] != NULL && degrees[size] != currentNode) {
+		if (degrees[size] != NULL && degrees[size] != currentNode) {
 			if (size > maxDegree - 1) {
-				maxDegree = size + 1;
+				maxDegree = size + 2;
 				degrees = (node_t **)realloc(degrees, maxDegree * sizeof(node_t *));
 			}
-			mergeNodes(currentNode, degrees[size], fibHeap);		
+			mergeNodes(currentNode, degrees[size], fibHeap, degrees);		
 		
 		}
 		degrees[size] = currentNode;
 
 	}while (currentNode->rightNode != fibHeap->root_list->head);
+
+	free(degrees);
 }
 
 node_t * extractMin(fibheap_t * fibHeap) {
@@ -92,7 +103,11 @@ node_t * extractMin(fibheap_t * fibHeap) {
 void printFibHeap(list_t * list, int depth) {
 	node_t * currentNode = list->head;
 	do {
-		printf("%d %d\n", depth, currentNode->key);
+		char * indent = malloc((depth + 1) * sizeof(char));
+		for (int i = 0; i < depth; i++) {
+			indent[i] = '\t';		
+		}
+		printf("%sDepth: %d Node-Key: %d\n", indent, depth, currentNode->key);
 		if (currentNode->child != NULL) printFibHeap(currentNode->child, depth + 1);
 		currentNode = currentNode->rightNode;
 	}while (currentNode != list->head);	

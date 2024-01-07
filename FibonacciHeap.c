@@ -72,13 +72,11 @@ void mergeNodes(node_t * node1, node_t * node2, fibheap_t * fibHeap, node_t ** d
 }
 
 void consolidateFibHeap(fibheap_t * fibHeap) {
-
 	//initialize list of nodes by degree with 5
 	size_t maxDegree = 5;
 	node_t ** degrees = (node_t **)calloc(maxDegree, sizeof(node_t *));
 	//initialize noce to check with head of root list
 	node_t * currentNode = fibHeap->root_list->head;
-
 	// go through all nodes of the root list
 	do {
 		size_t size;
@@ -137,9 +135,8 @@ node_t * extractMin(fibheap_t * fibHeap) {
 		//set head of child list to NULL, effectively emptying it to then delete
 		childList->head = NULL;
 		deleteList(childList);
-
-	
 	}
+	//remove min node from root list
 	removeFromList(fibHeap->root_list, min, 0);
 	
 	//call function to minimize the number of nodes in the root list
@@ -156,6 +153,45 @@ node_t * extractMin(fibheap_t * fibHeap) {
 
 	//return min Node in case you actually want to do something with the value...
 	return min;	
+}
+
+void cutNode(fibheap_t * fibHeap, node_t * node) {
+	//set pointer to father node for marking/cutting later
+	node_t * father = NULL;
+	if (node->own->father != NULL) father = node->own->father;
+
+	//remove node from child list of father and move to root list if not already there
+	//then check if node key is smaller than min key, if it is, set node as min
+	if (node->own != fibHeap->root_list) {
+		removeFromList(node->own, node, 0);
+		node->marked = 0;
+		addToList(fibHeap->root_list, node);
+		if (node->key < fibHeap->min->key) fibHeap->min = node;
+	}
+	
+	// mark father node if not marked already (having lost a child)
+	// if already marked, recursively cut out father node as well
+	if (!father->marked) {
+		father->marked = 1;
+	} else {
+		cutNode(fibHeap, father);
+	}
+}
+
+void decreaseKey(fibheap_t * fibHeap, node_t * node, int newKey) {
+	//set key of node to new value
+	node->key = newKey;
+	//if key of node is still bigger than key of father, nothing to do, return
+	if (node->own->father != NULL && newKey >= node->own->father->key) return;
+	cutNode(fibHeap, node);
+
+}
+
+void delete(fibheap_t * fibHeap, node_t * node) {
+	//to delete a node, simply decrease its key to below the minimal min key value
+	//then call extract key to remove it from the fibHeap
+	decreaseKey(fibHeap, node, -1);
+	extractMin(fibHeap);
 }
 
 void printFibHeap(list_t * list, int depth) {
@@ -175,18 +211,14 @@ void printFibHeap(list_t * list, int depth) {
 int main() {
 	fibheap_t * fib = createFibHeap();
 	for (int i = 1; i < 17; i++) {
-		//printf("Node: %d\n", i);
 		node_t * node = createNode(i, NULL);
 		insert(node, fib);
 	}
 	fib->min->child = (list_t *)malloc(sizeof(list_t));
 	addToList(fib->min->child, createNode(10, NULL));
-	//printf("List-Size:%ld\n", fib->root_list->size);
-	//printf("Head-Key:%d\n", fib->root_list->head->key);
 
 	node_t * min = extractMin(fib);
 	free(min);
-	//consolidateFibHeap(fib);
 
 	printFibHeap(fib->root_list, 0);
 	

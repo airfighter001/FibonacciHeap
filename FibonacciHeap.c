@@ -29,6 +29,15 @@ void deleteFibHeap(fibheap_t * fibHeap) {
 	free(fibHeap);
 }
 
+void merge(fibheap_t * thisFibHeap, fibheap_t * otherFibHeap) {
+	thisFibHeap->root_list->head->leftNode = otherFibHeap->root_list->tail;
+	thisFibHeap->root_list->tail->rightNode = otherFibHeap->root_list->head;
+	otherFibHeap->root_list->head->leftNode = thisFibHeap->root_list->tail;
+	otherFibHeap->root_list->tail->rightNode = thisFibHeap->root_list->head;
+	otherFibHeap->root_list->head = NULL;
+	deleteFibHeap(otherFibHeap);
+}
+
 void mergeNodes(node_t * node1, node_t * node2, fibheap_t * fibHeap, node_t ** degrees) {
 
 	//if nodes have degree 0, there's no child list yet, create and assign child list
@@ -202,6 +211,7 @@ void printFibHeap(list_t * list, int depth) {
 			indent[i] = '\t';		
 		}
 		printf("%sDepth: %d Node-Key: %d\n", indent, depth, currentNode->key);
+		free(indent);
 		if (currentNode->child != NULL) printFibHeap(currentNode->child, depth + 1);
 		currentNode = currentNode->rightNode;
 	}while (currentNode != list->head);	
